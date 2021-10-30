@@ -10,28 +10,27 @@ orbs:
 
           
 jobs:
-  # Exercise: Config and Deployment
-  configure_infrastructure: 
+  # Exercise: Smoke Testing
+  smoke_test:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: alpine:latest
     steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: 
-            -"d1:02:3e:8d:47:3d:32:1f:27:f5:eb:ef:e5:6c:39:45" 
+      - run: apk add --update curl
       - run:
-          name: Install dependencies
+          name: smoke test
           command: |
-            # install the dependencies needed for your playbook
-            apk add --update ansible 
-      - run:
-          name: Configure server
-          command: |
-            ansible-playbook  main.yml -i inventory.txt
+            URL="https://blog.udacity.com/"
+            # Test if website exists
+            if curl -s --head ${URL} 
+            then
+              return 0
+            else
+              return 1
+            fi
             
 workflows:
   # Name the workflow "welcome"
   my_workflow:
     # Run the welcome/run job in its own container
     jobs:
-      - configure_infrastructure
+      - smoke_test
